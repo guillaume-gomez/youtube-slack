@@ -4,7 +4,7 @@ require 'httparty'
 class YoutubeApi
   include HTTParty
 
-  base_uri "https://www.googleapis.com/youtube/v3/search"
+  base_uri "https://www.googleapis.com/youtube/v3"
 
   attr_accessor :search, :results
 
@@ -13,7 +13,17 @@ class YoutubeApi
     self.results = results
   end
 
-  def self.find(search)
-    # todo 
+ def self.find(search)
+    response = get("/search?part=snippet&q=#{search}&key=#{ENV['YOUTUBE_API']}")
+    if response.success?
+      JSON.parse(response)
+      # todo
+      full_urls << []
+      self.new(search, full_urls)
+      full_urls
+    else
+      # this just raises the net/http response that was raised
+      []
+    end
   end
 end
