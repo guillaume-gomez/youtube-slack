@@ -4,29 +4,29 @@ require 'httparty'
 
 require 'slack-ruby-client'
 
-def format_message(channel_id, risitas_url, user_id, text, choosed = false ,ts = nil, token = nil)
+def format_message(channel_id, youtube_video_id, user_id, text, choosed = false ,ts = nil, token = nil)
   actions = !choosed ?
     [
       {
-        name: 'select_risitas',
+        name: 'select_url',
         text: 'Previous',
         value: 'previous',
         type: 'button',
       },
       {
-        name: 'select_risitas',
+        name: 'select_url',
         text: 'Choose',
         value: 'choose',
         type: 'button',
       },
       {
-        name: 'select_risitas',
+        name: 'select_url',
         text: 'Next',
         value: 'next',
         type: 'button',
       },
       {
-        name: 'select_risitas',
+        name: 'select_url',
         text: 'Cancel',
         value: 'cancel',
         type: 'button',
@@ -36,9 +36,9 @@ def format_message(channel_id, risitas_url, user_id, text, choosed = false ,ts =
     []
 
 
-  pretext = !choosed ? "Est ce le risitas que tu voulais ?\n" : ""
+  pretext = !choosed ? "Est ce le lien que tu voulais ?\n" : ""
   title = !choosed ? "" : text
-  title_link = !choosed ? "" : risitas_url
+  title_link = !choosed ? "" : "https://www.youtube.com/watch?v=#{youtube_video_id}"
   as_user = !choosed
   
   username = nil
@@ -53,8 +53,8 @@ def format_message(channel_id, risitas_url, user_id, text, choosed = false ,ts =
     pretext: pretext,
     title: title,
     title_link: title_link,
-    image_url: risitas_url,
-    callback_id: 'select_risitas',
+    image_url: youtube_video_id,
+    callback_id: 'select_url',
     actions: actions
   }]
 
@@ -102,14 +102,14 @@ class YoutubeSlack < Sinatra::Base
     user_name = params["user_name"]
     text = params["text"]
     response_url = params["response_url"]
-    risitas_urls = [] # result to add
+    youtube_video_ids = [] # result to add
 
-    if risitas_urls.count == 0
+    if youtube_video_ids.count == 0
       $teams.client().chat_postMessage(user: user_id, channel: channel_id, text: "No results _:(_ for this research ' *#{text}* '")
       return ""
     end
     
-    $last_results = risitas_urls
+    $last_results = youtube_video_ids
     $last_search = text
     $current_index = 0
     $teams.client().chat_postEphemeral(format_message(channel_id, $last_results[$current_index], user_id, text))

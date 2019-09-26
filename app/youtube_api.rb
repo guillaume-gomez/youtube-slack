@@ -1,5 +1,6 @@
 require 'uri'
 require 'httparty'
+require "byebug"
 
 class YoutubeApi
   include HTTParty
@@ -14,11 +15,10 @@ class YoutubeApi
   end
 
  def self.find(search)
-    response = get("/search?part=snippet&q=#{search}&key=#{ENV['YOUTUBE_API']}")
+    response = get("/search?maxResults=50&order=relevance&part=snippet&q=#{search}&key=#{ENV['YOUTUBE_API']}")
+    full_urls = []
     if response.success?
-      JSON.parse(response)
-      # todo
-      full_urls << []
+      full_urls << JSON.parse(response.body)["items"].map { |item| item["id"]["videoId"] }
       self.new(search, full_urls)
       full_urls
     else
